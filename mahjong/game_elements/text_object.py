@@ -2,8 +2,8 @@ import pygame
 
 
 class TextObject:
-    def __init__(self, x, y, text, color, font_name, font_size, depth=0, is_bold=True):
-        self.pos = (x, y)
+    def __init__(self, left, top, text, color, font_name, font_size, depth=0, is_bold=True):
+        self.pos = (left, top)
         self.text = text
         self.color = color
         self.font = pygame.font.SysFont(font_name, font_size, bold=is_bold, italic=True)
@@ -22,7 +22,7 @@ class TextObject:
         text_surface = self.font.render(text, False, self.color)
         return text_surface, text_surface.get_rect()
 
-    def update(self):
+    def update(self, dw, dh):
         pass
 
     @property
