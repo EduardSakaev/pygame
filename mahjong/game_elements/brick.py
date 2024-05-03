@@ -35,12 +35,19 @@ class Brick(ElementBase):
     @color.setter
     def color(self, value):
         self._color = value
-        self._surface.fill(self.color)
+        self._surface.fill(self._color)
 
     @ElementBase.width.setter
     def width(self, value):
         self._bounds.width = value
         self._surface = pygame.Surface((self.width, self.height))
-        self.color = self._color
+        self._color = self._color
+        self.alpha = self._alpha
+
+    @ElementBase.height.setter
+    def height(self, value):
+        self._bounds.height = value
+        self._surface = pygame.Surface((self.width, self.height))
+        self._color = self._color
         self.alpha = self._alpha
 

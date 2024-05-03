@@ -51,7 +51,8 @@ class ChipMatrixHelper:
 
     def create_chips_matrix(self):
         unique_chips = cycle(range(1, CHIP_CONSTANTS.UNIQUE_CHIPS + 1))
-        chips = [next(unique_chips) for _ in range(self.columns - 2) for _ in range(self.rows - 2)]
+        chips = ['{}'.format(next(unique_chips))
+                 for _ in range(self.columns - 2) for _ in range(self.rows - 2)]
         random.shuffle(chips)
         random.shuffle(chips)
         random.shuffle(chips)
@@ -74,6 +75,10 @@ class ChipMatrixHelper:
 
     def update_matrix(self, row, column, value):
         self.chips_matrix[self.get_id_by_row_column(row, column)] = value
+
+    def shuffle_matrix(self):
+        data_objects = [(index, value) for index, value in enumerate(self.chips_matrix) if value != 0]
+        return random.shuffle(data_objects)
 
     def can_connect(self, row1, column1, row2, column2):
         cur_row = row1
@@ -167,6 +172,31 @@ class ChipMatrixHelper:
                                                               path[-1][0], path[-1][1])
         corners = corners + 1 if is_corner else corners
         return corners > self.max_corners
+
+    def provide_possible_connection(self):
+        length = len(self.chips_matrix)
+        for index_left in range(length):
+            value_left = self.chips_matrix[index_left]
+
+            if value_left == 0 or index_left == len(self.chips_matrix) - 1:
+                continue
+
+            for index_right in range(index_left + 1, length):
+                value_right = self.chips_matrix[index_right]
+                if index_left == index_right or value_right == 0:
+                    continue
+
+                if value_left == value_right:
+                    row_left, col_left = self.get_row_column_by_array_id(index_left)
+                    row_right, col_right = self.get_row_column_by_array_id(index_right)
+
+                    if self.can_connect(row_left, col_left, row_right, col_right):
+                        return (row_left, col_left), (row_right, col_right)
+
+    def validate_matrix_on_connectivity(self):
+        result = self.provide_possible_connection()
+        if not result:
+            pass
 
     @staticmethod
     def is_corner(row1, col1, row2, col2, row3, col3):

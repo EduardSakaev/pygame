@@ -2,6 +2,7 @@ import pygame
 
 from constants import TEXTURES
 from game_elements.element_base import ElementBase
+from uuid import uuid4
 
 
 class ImageObjectBase(ElementBase):
@@ -12,12 +13,17 @@ class ImageObjectBase(ElementBase):
         self._max_height = self._image_obj.get_height()
         self._angle = 0
         self._start_track_time = None
+        self._unique_id = uuid4()
 
         ElementBase.__init__(self, left, top, self._max_width, self._max_height, depth)
 
     @property
     def image_name(self):
         return self._image_name
+
+    @property
+    def unique_id(self):
+        return self._unique_id
 
     @classmethod
     def load_image(cls, image_name):

@@ -5,6 +5,7 @@ class GAME_CONSTANTS:
     GAME_NAME = 'Mahjong game'
     FRAME_RATE = 90
     MAX_CORNERS = 2
+    RESIZE_DIMENSIONS = ((1200, 800),)
 
 
 class CHIP_CONSTANTS:

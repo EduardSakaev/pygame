@@ -1,5 +1,3 @@
-import pygame
-
 from constants import TEXTURES, STATES
 from game_elements.image_object_base import ImageObjectBase
 
@@ -10,8 +8,6 @@ class Chip(ImageObjectBase):
         self._row = row
         self._column = column
         self._state = STATES.NORMAL
-        self._chip_light_width = self._chip_light.get_width()
-        self._chip_light_height = self._chip_light.get_height()
         self._remove_chip_action = False
         self._is_object_removed = False
 
@@ -47,9 +43,17 @@ class Chip(ImageObjectBase):
     def row(self):
         return self._row
 
+    @row.setter
+    def row(self, value):
+        self._row = value
+
     @property
     def column(self):
         return self._column
+
+    @column.setter
+    def column(self, value):
+        self._column = value
 
     @property
     def is_removed(self):
@@ -57,20 +61,6 @@ class Chip(ImageObjectBase):
 
     def __repr__(self):
         return '{}_{}'.format(self._row, self._column)
-
-    def update_chip_light(self, dw_pr, dh_pr):
-        chip_light_obj = self.load_image(TEXTURES.CHIP_BORDER_NAME)
-
-        width = chip_light_obj.get_width()
-        height = chip_light_obj.get_height()
-        new_width = width if dw_pr == 1 else self._chip_light_width * (1 + dw_pr)
-        new_height = height if dw_pr == 1 else self._chip_light_height * (1 + dh_pr)
-        self._chip_light = pygame.transform.smoothscale(chip_light_obj, (new_width, new_height))
-        self._chip_light_width = new_width
-        self._chip_light_height = new_height
-
-    def scale_object(self, dw_pr, dh_pr):
-        pass
 
     def remove_chip_from_board(self):
         self._remove_chip_action = True
@@ -83,7 +73,10 @@ class Chip(ImageObjectBase):
             self._remove_chip_action = False
             self._is_object_removed = True
 
+    @property
+    def scale_speed(self):
+        return
+
     def update(self):
         if self._remove_chip_action:
             self.remove_chip_action()
-
