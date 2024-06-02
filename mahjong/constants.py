@@ -6,6 +6,11 @@ class GAME_CONSTANTS:
     FRAME_RATE = 90
     MAX_CORNERS = 2
     RESIZE_DIMENSIONS = ((1200, 800),)
+    AUDIO_FREQUENCY = 44100
+    AUDIO_SIZE = -16  # The size argument represents how many bits are used for each audio sample
+    AUDIO_CHANNELS = 2  # The channels argument is used to specify whether to use mono or stereo.
+    # 1 for mono and 2 for stereo
+    AUDIO_BUFFER = 4096  # The buffer argument controls the number of internal samples used in the sound mixer
 
 
 class CHIP_CONSTANTS:

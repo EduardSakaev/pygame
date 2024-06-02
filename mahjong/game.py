@@ -1,34 +1,21 @@
 import sys
-from collections import defaultdict
 
 import pygame
 
 from constants import STATES
+from game_base import GameBase
+from scene_builders.mahjong_scene.mahjong_manager import MahjongManager
+from scene_builders.scene_director import SceneDirector
 
 
-class Game:
-    def __init__(self, frame_rate):
-        self._frame_rate = frame_rate
-        self._game_over = False
-        self._keydown_handlers = defaultdict(list)
-        self._keyup_handlers = defaultdict(list)
-        self._mouse_handlers = list()
-        self._is_game_resized = False
-        self._scale_coeff = 1
-        self.clock = pygame.time.Clock()
-
+class Game(GameBase):
+    def __init__(self, caption, frame_rate):
+        GameBase.__init__(self, frame_rate)
+        self._director = SceneDirector(caption)
+        mahjong_manager = MahjongManager(self._director.width, self._director.height)
+        self._director.add_manager(mahjong_manager)
+        self._director.create_scene()
         self._screen_state = STATES.NORMAL
-        self._builder = None
-        self._director = None
-
-    def update(self):
-        self._builder.sort_objects(key=lambda obj: obj.depth)
-        for o in self._builder.objects:
-            o.update()
-
-    def draw(self):
-        for obj in self._builder.objects:
-            obj.draw(self._director.surface)
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -54,29 +41,20 @@ class Game:
                 self._screen_state = STATES.FULLSCREEN
                 self._director.surface = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
-    def handle_mouse_events(self, type, pos):
-        for handler in self._mouse_handlers:
-            handler(type, pos)
+    def handle_mouse_events(self, event_type, pos):
+        self._director.handle_mouse_events(event_type, pos)
 
     def handle_key_down_event(self, key):
-        for handler in self._keydown_handlers[key]:
-            handler(key)
+        self._director.handle_key_down_event(key)
 
     def handle_key_up_events(self, key):
-        for handler in self._keyup_handlers[key]:
-            handler(key)
+        self._director.handle_key_up_events(key)
 
     def handle_game_resize(self):
-        self._director.width, self._director.height = pygame.display.get_surface().get_size()
-        self._is_game_resized = True
+        self._director.handle_game_resize()
 
-    def run(self):
-        while not self._game_over:
-            self._director.surface.fill((0, 0, 0))
+    def update(self):
+        self._director.update()
 
-            self.handle_events()
-            self.update()
-            self.draw()
-
-            pygame.display.update()
-            self.clock.tick(self._frame_rate)
+    def draw(self):
+        self._director.draw()

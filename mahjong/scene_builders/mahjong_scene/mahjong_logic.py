@@ -1,5 +1,5 @@
-import random
 import math
+import random
 from itertools import cycle
 
 from pygame import image
@@ -7,7 +7,7 @@ from pygame import image
 from constants import CHIP_CONSTANTS, TEXTURES, GAME_CONSTANTS
 
 
-class ChipMatrixHelper:
+class MahjongLogic:
     def __init__(self, width, height):
         self.columns = CHIP_CONSTANTS.COLUMNS + 2
         self.rows = CHIP_CONSTANTS.ROWS + 2
@@ -19,6 +19,7 @@ class ChipMatrixHelper:
         self.max_chip_width = self.chip_width = chip_obj.get_width()
         self.max_chip_height = self.chip_height = chip_obj.get_height()
         self.max_game_width = self.game_width = width
+        self.max_game_height = self.game_height = height
         self.max_game_height = self.game_height = height
 
     def get_x_y_by_row_column(self, row, column):
@@ -198,6 +199,38 @@ class ChipMatrixHelper:
         if not result:
             pass
 
+    def shuffle_chips(self, chips):
+        counter = len(chips)
+        chips_objs = list(chips.values())
+
+        while counter > 0:
+            # Generate a random integer between 0 and counter
+            rnd = random.randint(0, counter)
+            counter -= 1
+
+            # Swap the element at the random index with the element at counter
+            self._swap_chips(chips_objs[counter], chips_objs[rnd])
+            chips_objs[counter], chips_objs[rnd] = chips_objs[rnd], chips_objs[counter]
+
+    def _swap_chips(self, obj_left, obj_right):
+        matrix_id_left = self.get_id_by_row_column(obj_left.row, obj_left.column)
+        matrix_id_right = self.get_id_by_row_column(obj_right.row, obj_right.column)
+        self.chips_matrix[matrix_id_left], self.chips_matrix[matrix_id_right] = \
+            self.chips_matrix[matrix_id_right], self.chips_matrix[matrix_id_left]
+
+        obj_left.row, obj_right.row = obj_right.row, obj_left.row
+        obj_left.column, obj_right.column = obj_right.column, obj_left.column
+        obj_left.left, obj_right.left = obj_right.left, obj_left.left
+        obj_left.top, obj_right.top = obj_right.top, obj_left.top
+
+    def update_obj_pos(self, obj, x, y):
+        obj.left = x
+        obj.top = y
+
+    def update(self, new_width, new_height):
+        self.game_width = new_width
+        self.game_height = new_height
+
     @staticmethod
     def is_corner(row1, col1, row2, col2, row3, col3):
         return (row1 - row3) * (col2 - col3) != (row2 - row3) * (col1 - col3)
@@ -221,8 +254,3 @@ class ChipMatrixHelper:
     @property
     def matrix_height(self):
         return self.rows * (self.chip_height + self.space_rows)
-
-    def update(self, new_width, new_height):
-        self.game_width = new_width
-        self.game_height = new_height
-
