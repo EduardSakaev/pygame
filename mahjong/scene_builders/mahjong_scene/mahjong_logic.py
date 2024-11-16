@@ -15,7 +15,7 @@ class MahjongLogic:
         self.max_corners = GAME_CONSTANTS.MAX_CORNERS
 
         self.chips_matrix = self.create_matrix_game_field()
-        chip_obj = image.load('{}/{}'.format(TEXTURES.PATH, TEXTURES.CHIP_NAME_PATTERN.format('1')))
+        chip_obj = image.load('{}'.format(TEXTURES.CHIP_NAME_PATTERN.format('1')))
         self.max_chip_width = self.chip_width = chip_obj.get_width()
         self.max_chip_height = self.chip_height = chip_obj.get_height()
         self.max_game_width = self.game_width = width

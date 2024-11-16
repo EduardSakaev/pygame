@@ -2,6 +2,11 @@ from abc import abstractmethod
 
 
 class ManagerBase:
+    def __init__(self):
+        self._manager_name = ''
+        self._is_scene_created = False
+        self._is_hidden = False
+
     @abstractmethod
     def create_scene(self):
         pass
@@ -33,3 +38,15 @@ class ManagerBase:
     @abstractmethod
     def scene_priority(self):
         pass
+
+    @property
+    def name(self):
+        return self._manager_name
+
+    @property
+    def is_created(self):
+        return self._is_scene_created
+
+    @property
+    def is_hidden(self):
+        return self._is_hidden

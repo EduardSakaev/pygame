@@ -1,33 +1,46 @@
 import pygame
 
-from constants import TEXTURES
 from game_elements.element_base import ElementBase
-from uuid import uuid4
 
 
 class ImageObjectBase(ElementBase):
     def __init__(self, left, top, image_name, depth=0):
-        self._image_name = image_name
+        self._image_path = image_name
         self._image_obj = self.load_image(image_name).convert_alpha()
-        self._max_width = self._image_obj.get_width()
-        self._max_height = self._image_obj.get_height()
+        self._width = self._image_obj.get_width()
+        self._height = self._image_obj.get_height()
         self._angle = 0
         self._start_track_time = None
-        self._unique_id = uuid4()
 
-        ElementBase.__init__(self, left, top, self._max_width, self._max_height, depth)
+        ElementBase.__init__(self, left, top, self._width, self._height, depth)
 
     @property
     def image_name(self):
-        return self._image_name
-
-    @property
-    def unique_id(self):
-        return self._unique_id
+        return self._image_path
 
     @classmethod
     def load_image(cls, image_name):
-        return pygame.image.load('{}/{}'.format(TEXTURES.PATH, image_name))
+        return pygame.image.load('{}'.format(image_name))
+
+    @property
+    def width(self):
+        return self._width
+
+    @width.setter
+    def width(self, value):
+        self._width = value
+        self._image_obj = pygame.transform.scale(self._image_obj, (value, self._height))
+        super(ImageObjectBase, type(self)).width.fset(self, value)
+
+    @property
+    def height(self):
+        return self._height
+
+    @height.setter
+    def height(self, value):
+        self._height = value
+        self._image_obj = pygame.transform.scale(self._image_obj, (self._width, value))
+        super(ImageObjectBase, type(self)).height.fset(self, value)
 
     @property
     def alpha(self):
@@ -55,8 +68,8 @@ class ImageObjectBase(ElementBase):
     def scale(self, width, height, angle=0):
         image_obj = self.load_image(self.image_name)
         self._image_obj = pygame.transform.smoothscale(image_obj, (width, height))
-        self._bounds.width = width
-        self._bounds.height = height
+        self.width = width
+        self.height = height
         self.rotate(angle)
 
     def update(self):

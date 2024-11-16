@@ -14,6 +14,7 @@ class MahjongManager(ManagerBase):
     """
 
     def __init__(self, width, height):
+        super().__init__()
         self._width, self._height = width, height
         self._mahjong_logic = MahjongLogic(width, height)
         self._mahjong_builder = MahjongBuilder()
@@ -23,27 +24,27 @@ class MahjongManager(ManagerBase):
         self._selected_chip = None
         self._is_game_resized = False
         self._connection_lines = list()
+        self._manager_name = MahjongManager.__name__
 
     def create_scene(self):
-        self._mahjong_builder.create_cursor()
-        self._mahjong_builder.create_background()
-        self._mahjong_builder.create_matrix_background(self._mahjong_logic)
-        self._mahjong_builder.create_chips_background(self._mahjong_logic)
-        self._mahjong_builder.create_chips(self._mahjong_logic)
-        self._mahjong_builder.create_sound_effects()
-        self._mahjong_builder.sound_effects['background'].play(-1)
+        if not self._is_scene_created:
+            self._mahjong_builder.create_cursor()
+            self._mahjong_builder.create_background()
+            self._mahjong_builder.create_matrix_background()
+            self._mahjong_builder.create_chips_background(self._mahjong_logic)
+            self._mahjong_builder.create_chips(self._mahjong_logic)
+            self._mahjong_builder.sound_effects.sounds['BACKGROUND'].play(-1)
 
-        self._mahjong_builder.sort_objects()
-        self._mouse_handlers.append(self._mahjong_builder.cursor.handle)
+            self._mahjong_builder.sort_objects()
+            self._mouse_handlers.append(self._mahjong_builder.cursor.handle_events)
+            self._is_scene_created = True
 
     def update(self):
         if self._is_game_resized:
             self._mahjong_logic.update(self._width, self._height)
-
-            x, y = self._mahjong_logic.get_matrix_top_left_x_y()
-            self._mahjong_builder.matrix_background.width = self._mahjong_logic.matrix_width - self._mahjong_logic.space_columns
-            self._mahjong_builder.matrix_background.height = self._mahjong_logic.matrix_height - self._mahjong_logic.space_rows
-            self._mahjong_logic.update_obj_pos(self._mahjong_builder.matrix_background, x, y)
+            self._mahjong_builder.matrix_background.width = self._width
+            self._mahjong_builder.matrix_background.height = self._height
+            self._mahjong_logic.update_obj_pos(self._mahjong_builder.matrix_background, 0, 0)
 
             for chip_obj in self._mahjong_builder.chip_objects.values():
                 new_x, new_y = self._mahjong_logic.get_x_y_by_row_column(chip_obj.row, chip_obj.column)
@@ -140,18 +141,17 @@ class MahjongManager(ManagerBase):
                     conn_path = self._mahjong_logic.connect(self._selected_chip.row, self._selected_chip.column,
                                                             chip_obj.row, chip_obj.column)
 
-                    print(conn_path)
                     if conn_path:
 
                         chip_obj.remove_chip_from_board()
                         self._selected_chip.remove_chip_from_board()
-                        self._mahjong_builder.sound_effects['connection_done'].play()
+                        self._mahjong_builder.sound_effects.sounds['CONNECTION_DONE'].play()
                         self.visualize_connection(conn_path)
                         result = self._mahjong_logic.provide_possible_connection()
                         if not result:
                             self._mahjong_logic.shuffle_chips(self._mahjong_builder.chip_objects)
                     else:
-                        self._mahjong_builder.sound_effects['connection_wrong'].play()
+                        self._mahjong_builder.sound_effects.sounds['CONNECTION_WRONG'].play()
 
                 self._selected_chip = None
                 return
@@ -170,3 +170,6 @@ class MahjongManager(ManagerBase):
     @surface.setter
     def surface(self, surface):
         self._surface = surface
+
+    def hide(self):
+        self._is_hidden = True

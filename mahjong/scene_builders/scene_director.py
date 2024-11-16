@@ -2,7 +2,6 @@ import ctypes
 import sys
 
 import pygame
-from constants import GAME_CONSTANTS
 
 
 class SceneDirector:
@@ -13,10 +12,6 @@ class SceneDirector:
         self._init_game(caption)
 
     def _init_game(self, caption):
-        pygame.mixer.init(GAME_CONSTANTS.AUDIO_FREQUENCY,
-                          GAME_CONSTANTS.AUDIO_SIZE,
-                          GAME_CONSTANTS.AUDIO_CHANNELS,
-                          GAME_CONSTANTS.AUDIO_BUFFER)  # pygame module for loading and playing sounds
         pygame.init()
         pygame.font.init()
 
@@ -29,6 +24,7 @@ class SceneDirector:
         manager.surface = self.surface
         self._managers.append(manager)
         self._managers = sorted(self._managers, key=lambda manager_obj: manager_obj.scene_priority)
+        manager.create_scene()
 
     def remove_manager(self, manager):
         self._managers.remove(manager)

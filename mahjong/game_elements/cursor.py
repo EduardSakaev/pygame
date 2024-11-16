@@ -11,7 +11,7 @@ class Cursor(ImageObjectBase):
     def draw(self, surface):
         surface.blit(self.image_obj, self._cursor_pos)
 
-    def handle(self, event_type, event_pos):
+    def handle_events(self, event_type, event_pos):
         if event_type == pygame.MOUSEMOTION:
             self.handle_mouse_move(event_pos)
 

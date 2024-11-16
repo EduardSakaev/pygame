@@ -1,7 +1,8 @@
 import pygame
 
-import colors
-from constants import TEXTURES, SOUND
+from constants import COLORS
+from sounds import Sounds
+from constants import TEXTURES
 from game_elements.brick import Brick
 from game_elements.chip import Chip
 from game_elements.cursor import Cursor
@@ -16,7 +17,7 @@ class MahjongBuilder:
         self._chip_objects = dict()
         self._chip_background_objects = list()
         self._cursor = None
-        self._sound_effects = None
+        self._sound_effects = Sounds()
 
     def create_cursor(self):
         self._cursor = Cursor(TEXTURES.CURSOR, 100)
@@ -24,15 +25,13 @@ class MahjongBuilder:
 
     def create_background(self):
         display_info = pygame.display.Info()
-        self._background = ImageObjectBase(0, 0, TEXTURES.BACKGROUND, -100)
+        self._background = ImageObjectBase(0, 0, TEXTURES.MAHJONG_BG, -100)
         self._background.scale(display_info.current_w, display_info.current_h)
         self._scene_objects.append(self._background)
 
-    def create_matrix_background(self, mahjong_logic):
-        x, y = mahjong_logic.get_matrix_top_left_x_y()
-        width = mahjong_logic.matrix_width - mahjong_logic.space_columns
-        height = mahjong_logic.matrix_height - mahjong_logic.space_rows
-        self._matrix_background = Brick(x, y, width, height, colors.GRAY1, -50)
+    def create_matrix_background(self):
+        display_info = pygame.display.Info()
+        self._matrix_background = Brick(0, 0, display_info.current_w, display_info.current_h, COLORS.GRAY1, -50)
         self._matrix_background.alpha = 120
         self._scene_objects.append(self._matrix_background)
 
@@ -41,8 +40,8 @@ class MahjongBuilder:
         chip_height = mahjong_logic.chip_height
         for index, _ in enumerate(mahjong_logic.chips_matrix):
             x, y = mahjong_logic.get_x_y_by_id(index)
-            brick_chip_obj = Brick(x, y, chip_width, chip_height, colors.PINK, -49)
-            brick_chip_obj.alpha = 30
+            brick_chip_obj = Brick(x, y, chip_width, chip_height, COLORS.PINK, -49)
+            brick_chip_obj.alpha = 60
             self._chip_background_objects.append(brick_chip_obj)
             self._scene_objects.append(brick_chip_obj)
 
@@ -58,14 +57,6 @@ class MahjongBuilder:
 
             self._scene_objects.append(chip_obj)
             self._chip_objects[chip_obj.unique_id] = chip_obj
-
-    def create_sound_effects(self):
-        self._sound_effects = {
-            'background': pygame.mixer.Sound(SOUND.BACKGROUND),
-            'level_complete': pygame.mixer.Sound(SOUND.LEVEL_COMPLETE),
-            'connection_done': pygame.mixer.Sound(SOUND.CONNECTION_DONE),
-            'connection_wrong': pygame.mixer.Sound(SOUND.CONNECTION_WRONG)
-        }
 
     def sort_objects(self):
         self._scene_objects = sorted(self._scene_objects, key=lambda obj: obj.depth)

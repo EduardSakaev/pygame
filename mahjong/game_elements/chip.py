@@ -4,14 +4,14 @@ from game_elements.image_object_base import ImageObjectBase
 
 class Chip(ImageObjectBase):
     def __init__(self, left, top, image_name, row, column, depth=0):
+        ImageObjectBase.__init__(self, left, top, image_name, depth)
         self._chip_light = self.load_image(TEXTURES.CHIP_BORDER_NAME)
+        self._image_max_width = self.width
         self._row = row
         self._column = column
         self._state = STATES.NORMAL
         self._remove_chip_action = False
         self._is_object_removed = False
-
-        ImageObjectBase.__init__(self, left, top, image_name, depth)
 
     def draw(self, surface):
         surface.blit(self.image_obj, self._bounds)
@@ -69,7 +69,7 @@ class Chip(ImageObjectBase):
     def remove_chip_action(self):
         remove_scale_speed = 0.92
         self.scale(self.width * remove_scale_speed, self.height * remove_scale_speed)
-        if self.width < 0.1 * self._max_width:
+        if self.width < 0.1 * self._image_max_width:
             self._remove_chip_action = False
             self._is_object_removed = True
 
