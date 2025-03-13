@@ -1,5 +1,6 @@
 import pygame
 from pygame.locals import RESIZABLE
+from delayed_call import DelayedCall
 
 from constants import TEXTURES
 from game_elements.image_object_base import ImageObjectBase
@@ -25,6 +26,9 @@ class MahjongManager(ManagerBase):
         self._is_game_resized = False
         self._connection_lines = list()
         self._manager_name = MahjongManager.__name__
+        self._level = 0
+        self._is_connected = False
+        self._delayed_call = DelayedCall()
 
     def create_scene(self):
         if not self._is_scene_created:
@@ -38,6 +42,10 @@ class MahjongManager(ManagerBase):
             self._mahjong_builder.sort_objects()
             self._mouse_handlers.append(self._mahjong_builder.cursor.handle_events)
             self._is_scene_created = True
+
+    def destroy(self):
+        self._mahjong_builder.sound_effects.sounds['BACKGROUND'].stop()
+        self._mahjong_builder = None
 
     def update(self):
         if self._is_game_resized:
@@ -65,6 +73,8 @@ class MahjongManager(ManagerBase):
 
         for scene_object in self._mahjong_builder.scene_objects:
             scene_object.update()
+
+        self._delayed_call.exec()
 
     def visualize_connection(self, path):
         depth = 2
@@ -107,13 +117,21 @@ class MahjongManager(ManagerBase):
         for handler in self._mouse_handlers:
             handler(event_type, pos)
 
-        for chip_obj in self._mahjong_builder.chip_objects.values():
             if event_type == pygame.MOUSEBUTTONDOWN:
-                self.handle_mouse_down_event(chip_obj, pos)
-            elif event_type == pygame.MOUSEBUTTONUP:
-                chip_obj.handle_mouse_up(pos)
-            elif event_type == pygame.MOUSEMOTION:
-                chip_obj.handle_mouse_move(pos)
+                for chip_obj in self._mahjong_builder.chip_objects.values():
+                    if chip_obj.rect.collidepoint(pos):
+                        self.handle_mouse_down_event(chip_obj, pos)
+                        break
+                else:
+                    if self._selected_chip:
+                        self._selected_chip.handle_mouse_down(pos)
+                        self._selected_chip = None
+
+            for chip_obj in self._mahjong_builder.chip_objects.values():
+                if event_type == pygame.MOUSEBUTTONUP:
+                    chip_obj.handle_mouse_up(pos)
+                elif event_type == pygame.MOUSEMOTION:
+                    chip_obj.handle_mouse_move(pos)
 
     def handle_key_down_event(self, key):
         pass
@@ -132,32 +150,34 @@ class MahjongManager(ManagerBase):
         self._is_game_resized = True
 
     def handle_mouse_down_event(self, chip_obj, pos):
-        if chip_obj.rect.collidepoint(pos):
-            if self._selected_chip and str(self._selected_chip) == str(chip_obj):
-                self._selected_chip = None
+        if self._selected_chip and str(self._selected_chip) == str(chip_obj):
+            self._selected_chip = None
+        elif self._selected_chip and str(self._selected_chip) != str(chip_obj):
+            if self._selected_chip.image_name == chip_obj.image_name:
+                conn_path = self._mahjong_logic.connect(self._selected_chip.row, self._selected_chip.column,
+                                                        chip_obj.row, chip_obj.column)
+                if conn_path:
+                    chip_obj.remove_chip_from_board()
+                    self._selected_chip.remove_chip_from_board()
+                    self._mahjong_builder.sound_effects.sounds['CONNECTION_DONE'].play()
+                    self.visualize_connection(conn_path)
+                    self._delayed_call.add(0.5, self._mahjong_logic.align_chips, self._mahjong_builder.chip_objects,
+                                           self._selected_chip.row,
+                                           self._selected_chip.column, chip_obj.row, chip_obj.column)
+                    result = self._mahjong_logic.provide_possible_connection()
+                    if not result:
+                        self._mahjong_logic.shuffle_chips(self._mahjong_builder.chip_objects)
+                else:
+                    self._mahjong_builder.sound_effects.sounds['CONNECTION_WRONG'].play()
 
-            elif self._selected_chip and str(self._selected_chip) != str(chip_obj):
-                if self._selected_chip.image_name == chip_obj.image_name:
-                    conn_path = self._mahjong_logic.connect(self._selected_chip.row, self._selected_chip.column,
-                                                            chip_obj.row, chip_obj.column)
-
-                    if conn_path:
-
-                        chip_obj.remove_chip_from_board()
-                        self._selected_chip.remove_chip_from_board()
-                        self._mahjong_builder.sound_effects.sounds['CONNECTION_DONE'].play()
-                        self.visualize_connection(conn_path)
-                        result = self._mahjong_logic.provide_possible_connection()
-                        if not result:
-                            self._mahjong_logic.shuffle_chips(self._mahjong_builder.chip_objects)
-                    else:
-                        self._mahjong_builder.sound_effects.sounds['CONNECTION_WRONG'].play()
-
-                self._selected_chip = None
-                return
-            else:
-                self._selected_chip = chip_obj
+            self._selected_chip.handle_mouse_down(pos)
+            self._selected_chip = None
+            return
+        else:
+            self._selected_chip = chip_obj
         chip_obj.handle_mouse_down(pos)
+        if self._selected_chip and chip_obj != self._selected_chip:
+            self._selected_chip.handle_mouse_down(pos)
 
     @property
     def scene_priority(self):
@@ -173,3 +193,12 @@ class MahjongManager(ManagerBase):
 
     def hide(self):
         self._is_hidden = True
+
+    @property
+    def level(self):
+        return self._level
+
+    @level.setter
+    def level(self, value):
+        self._mahjong_logic.level = value
+        self._level = value

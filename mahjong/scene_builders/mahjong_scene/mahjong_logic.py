@@ -21,6 +21,7 @@ class MahjongLogic:
         self.max_game_width = self.game_width = width
         self.max_game_height = self.game_height = height
         self.max_game_height = self.game_height = height
+        self.level = 0
 
     def get_x_y_by_row_column(self, row, column):
         left_top_x, left_top_y = self.get_matrix_top_left_x_y()
@@ -54,6 +55,8 @@ class MahjongLogic:
         unique_chips = cycle(range(1, CHIP_CONSTANTS.UNIQUE_CHIPS + 1))
         chips = ['{}'.format(next(unique_chips))
                  for _ in range(self.columns - 2) for _ in range(self.rows - 2)]
+
+        # TODO: need to refactor this one
         random.shuffle(chips)
         random.shuffle(chips)
         random.shuffle(chips)
@@ -104,7 +107,8 @@ class MahjongLogic:
                 break
 
             priority = {point: math.hypot(row2 - point[0], column2 - point[1]) for point in next_points}
-            for next_row, next_col in sorted(priority, key=lambda x: priority[x]):
+            priority = sorted(priority, key=lambda x: priority[x])
+            for next_row, next_col in priority:
                 if next_row >= self.rows or next_row < 0 or next_col >= self.columns or next_col < 0:
                     continue
 
@@ -162,6 +166,7 @@ class MahjongLogic:
             for row, column in ((row1, column1), (row2, column2)):
                 index = self.get_id_by_row_column(row, column)
                 self.chips_matrix[index] = 0
+
         return result
 
     def is_cell_empty(self, row, column):
@@ -199,6 +204,55 @@ class MahjongLogic:
         if not result:
             pass
 
+    def align_chips(self, chips, row_sel_1, col_sel_1, row_sel_2, col_sel_2):
+        alignment_conditions = {
+            2: lambda row1, col1, row2, col2: col1 == col2 and row1 > row2,  # align top
+            3: lambda row1, col1, row2, col2: row1 == row2 and col1 < col2,  # align right
+            4: lambda row1, col1, row2, col2: col1 == col2 and row1 < row2,  # align bottom
+            5: lambda row1, col1, row2, col2: row1 == row2 and col1 > col2,  # align left
+        }
+
+        new_pos = {
+            2: lambda row, col, row1, col1, row2, col2: (row - 2, col) if (col1 == col2 and row > row1 and row > row2)
+            else (row - 1, col),  # top
+            3: lambda row, col, row1, col1, row2, col2: (row, col + 2) if (row1 == row2 and col < col1 and col < col2)
+            else (row, col + 1),  # right
+            4: lambda row, col, row1, col1, row2, col2: (row + 2, col) if (col1 == col2 and row < row1 and row < row2)
+            else (row + 1, col),  # bottom
+            5: lambda row, col, row1, col1, row2, col2: (row, col - 2) if (row1 == row2 and col > col1 and col > col2)
+            else (row, col - 1),  # left
+        }
+
+        if self.level not in alignment_conditions:
+            return
+
+        cells_to_align = list()
+        for index, _ in enumerate(self.chips_matrix):
+            row, col = self.get_row_column_by_array_id(int(index))
+            if (alignment_conditions[self.level](row, col, row_sel_1, col_sel_1) or
+                    alignment_conditions[self.level](row, col, row_sel_2, col_sel_2)):
+                cells_to_align.append((row, col))
+
+        new_chips_positions = dict()
+        next_cell = new_pos[self.level](cells_to_align[0][0], cells_to_align[0][1],
+                                        row_sel_1, col_sel_1, row_sel_2, col_sel_2)
+        direction = (1 if cells_to_align[0][0] + cells_to_align[0][1] > next_cell[0] + next_cell[1]
+                     else -1)
+        for row, col in cells_to_align[::direction]:
+            row_new, col_new = new_pos[self.level](row, col, row_sel_1, col_sel_1, row_sel_2, col_sel_2)
+            cur_index = self.get_id_by_row_column(row, col)
+            index_swap = self.get_id_by_row_column(row_new, col_new)
+
+            self.chips_matrix[cur_index], self.chips_matrix[index_swap] = \
+                self.chips_matrix[index_swap], self.chips_matrix[cur_index]
+
+            for chip in chips.values():
+                if chip.row == row and chip.column == col:
+                    chip.row = row_new
+                    chip.column = col_new
+                    chip.left, chip.top = self.get_x_y_by_row_column(row_new, col_new)
+                    break
+
     def shuffle_chips(self, chips):
         counter = len(chips)
         chips_objs = list(chips.values())
@@ -211,6 +265,9 @@ class MahjongLogic:
             # Swap the element at the random index with the element at counter
             self._swap_chips(chips_objs[counter], chips_objs[rnd])
             chips_objs[counter], chips_objs[rnd] = chips_objs[rnd], chips_objs[counter]
+
+    def move_chips(self, level):
+        pass
 
     def _swap_chips(self, obj_left, obj_right):
         matrix_id_left = self.get_id_by_row_column(obj_left.row, obj_left.column)

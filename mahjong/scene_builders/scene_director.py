@@ -1,12 +1,15 @@
 import ctypes
 import sys
+import operator
 
 import pygame
+
+from collections import OrderedDict
 
 
 class SceneDirector:
     def __init__(self, caption):
-        self._managers = list()
+        self._managers = OrderedDict()
         self._surface = None
         self._width, self._height = 0, 0
         self._init_game(caption)
@@ -21,13 +24,16 @@ class SceneDirector:
         self._width, self._height = pygame.display.get_surface().get_size()
 
     def add_manager(self, manager):
+        if manager.name in self._managers:
+            self._managers[manager.name].destroy()
         manager.surface = self.surface
-        self._managers.append(manager)
-        self._managers = sorted(self._managers, key=lambda manager_obj: manager_obj.scene_priority)
+        self._managers[manager.name] = manager
+        self._managers = OrderedDict({key: value for key, value in sorted(self._managers.items(), key=lambda item:
+                                     item[1].scene_priority)})
         manager.create_scene()
 
-    def remove_manager(self, manager):
-        self._managers.remove(manager)
+    def remove_manager(self, manager_name):
+        self._managers = [manager for manager in self._managers if manager.name != manager_name]
 
     def set_windowed_mode(self):
         self._surface = pygame.display.set_mode((self._width, self._height), pygame.RESIZABLE)
@@ -37,7 +43,7 @@ class SceneDirector:
             ctypes.windll.user32.ShowWindow(HWND, SW_MAXIMIZE)
 
     def create_scene(self):
-        for manager in self._managers:
+        for manager in self._managers.values():
             manager.create_scene()
 
     @property
@@ -65,26 +71,30 @@ class SceneDirector:
         self._surface = value
 
     def update(self):
-        for manager in self._managers:
+        for manager in self._managers.values():
             manager.update()
 
     def draw(self):
-        for manager in self._managers:
+        for manager in self._managers.values():
             manager.draw()
 
     def handle_mouse_events(self, event_type, pos):
-        for manager in self._managers:
+        for manager in self._managers.values():
             manager.handle_mouse_events(event_type, pos)
 
     def handle_key_down_event(self, key):
-        for manager in self._managers:
+        for manager in self._managers.values():
             manager.handle_key_down_event(key)
 
     def handle_key_up_events(self, key):
-        for manager in self._managers:
+        for manager in self._managers.values():
             manager.handle_key_down_event(key)
+
+    def handle_user_event(self, key):
+        for manager in self._managers.values():
+            manager.handle_user_event(key)
 
     def handle_game_resize(self):
         self._width, self._height = pygame.display.get_surface().get_size()
-        for manager in self._managers:
+        for manager in self._managers.values():
             manager.handle_game_resize(self._width, self._height)

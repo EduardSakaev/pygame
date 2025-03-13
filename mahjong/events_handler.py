@@ -9,24 +9,15 @@ from scene_builders.mahjong_scene.mahjong_manager import MahjongManager
 from scene_builders.scene_director import SceneDirector
 
 
-class Game(GameBase):
-    def __init__(self, caption, frame_rate):
-        GameBase.__init__(self, frame_rate)
-        self._director = SceneDirector(caption)
-        self.menu_manager = MenuManager(self._director.width, self._director.height)
-        self.mahjong_manager = MahjongManager(self._director.width, self._director.height)
-        self._director.add_manager(self.menu_manager)
-        self._director.create_scene()
-        self._screen_state = STATES.NORMAL
-        self._is_menu_shown = True
+class EventsHandler:
+    def __init__(self, director):
+        self._director = director
 
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.USEREVENT:
                 if event.key == 'new_game':
                     self.start_new_game()
-                elif event.key == 'settings':
-                    pass
             elif event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
@@ -46,13 +37,6 @@ class Game(GameBase):
             elif event.type == pygame.VIDEORESIZE:
                 self.handle_game_resize()
 
-    def start_new_game(self, level=2):
-        self.mahjong_manager = MahjongManager(self._director.width, self._director.height)
-        self.mahjong_manager.level = level
-        self._director.add_manager(self.mahjong_manager)
-        self.menu_manager.hide()
-        self._is_menu_shown = False
-
     def handle_alt_tab(self, event):
         if event.mod & pygame.KMOD_ALT and event.key in [pygame.K_RETURN, pygame.K_KP_ENTER]:
             if self._screen_state == STATES.FULLSCREEN:
@@ -61,6 +45,9 @@ class Game(GameBase):
             elif self._screen_state == STATES.NORMAL:
                 self._screen_state = STATES.FULLSCREEN
                 self._director.surface = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+
+    def handle_game_resize(self):
+        self._director.handle_game_resize()
 
     def handle_mouse_events(self, event_type, pos):
         self._director.handle_mouse_events(event_type, pos)
@@ -73,12 +60,3 @@ class Game(GameBase):
 
     def handle_user_event(self, key):
         self._director.handle_user_event(key)
-
-    def handle_game_resize(self):
-        self._director.handle_game_resize()
-
-    def update(self):
-        self._director.update()
-
-    def draw(self):
-        self._director.draw()

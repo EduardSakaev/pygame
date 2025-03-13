@@ -23,15 +23,15 @@ class ManagerBase:
     def handle_mouse_events(self, type, pos):
         pass
 
-    @abstractmethod
     def handle_key_down_event(self, key):
         pass
 
-    @abstractmethod
+    def handle_user_event(self, key):
+        pass
+
     def handle_key_up_events(self, key):
         pass
 
-    @abstractmethod
     def handle_game_resize(self, new_width, new_height):
         pass
 
@@ -50,3 +50,6 @@ class ManagerBase:
     @property
     def is_hidden(self):
         return self._is_hidden
+
+    def destroy(self):
+        pass

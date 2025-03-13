@@ -60,7 +60,7 @@ class Chip(ImageObjectBase):
         return self._is_object_removed
 
     def __repr__(self):
-        return '{}_{}'.format(self._row, self._column)
+        return '{}'.format(self.unique_id)
 
     def remove_chip_from_board(self):
         self._remove_chip_action = True

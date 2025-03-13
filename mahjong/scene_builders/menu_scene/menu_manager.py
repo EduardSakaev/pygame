@@ -23,12 +23,11 @@ class MenuManager(ManagerBase):
     def create_scene(self):
         #  need to make it as decorator
         if not self._is_scene_created:
-            self._menu_builder.create_background()
-            self._menu_builder.create_cursor()
-            self._menu_builder.create_new_game_button()
+            self._menu_builder.create_menu()
             self._mouse_handlers.append(self._menu_builder.cursor.handle_events)
             self._mouse_handlers.append(self._menu_builder.new_game_button.handle_events)
-            self._menu_builder.sort_objects()
+            self._mouse_handlers.append(self._menu_builder.exit_game_button.handle_events)
+            self._mouse_handlers.append(self._menu_builder.settings_button.handle_events)
             self._is_scene_created = True
 
     def update(self):

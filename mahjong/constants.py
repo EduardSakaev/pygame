@@ -17,23 +17,23 @@ class CHIP_CONSTANTS:
 
 
 class TEXTURES:
-    MAHJONG_BG = 'images/mahjong_bg.jpg'
-    CURSOR = 'images/cursor.png'
-    CHIP_NAME_PATTERN = 'images/icons_64px/monster_{}.png'
-    CHIP_BORDER_NAME = 'images/icons_64px/monster_border.png'
-    LINE_NAME = 'images/icons_64px/line_horizontal.png'
-    POINT_NAME = 'images/icons_64px/dot.png'
-    MENU_BG = 'images/menu_bg.png'
-    MENU_CLOSE_BUTTON = 'images/menu_close_button.jpg'
-    BUTTON = 'images/buttons/menu_button_2.png'
+    MAHJONG_BG = 'resources/images/mahjong_bg.jpg'
+    CURSOR = 'resources/images/cursor.png'
+    CHIP_NAME_PATTERN = 'resources/images/icons_64px/monster_{}.png'
+    CHIP_BORDER_NAME = 'resources/images/icons_64px/monster_border.png'
+    LINE_NAME = 'resources/images/icons_64px/line_horizontal.png'
+    POINT_NAME = 'resources/images/icons_64px/dot.png'
+    MENU_BG = 'resources/images/menu_bg.png'
+    MENU_CLOSE_BUTTON = 'resources/images/menu_close_button.jpg'
+    BUTTON = 'resources/images/buttons/menu_button_2.png'
 
 
 class SOUNDS:
-    BACKGROUND = 'sound_effects/background.mp3'
-    CONNECTION_DONE = 'sound_effects/connection_done.wav'
-    CONNECTION_WRONG = 'sound_effects/connection_wrong.wav'
-    LEVEL_COMPLETE = 'sound_effects/level_complete.wav'
-    BRICK_HIT = 'sound_effects/brick_hit.wav'
+    BACKGROUND = 'resources/sound_effects/background.mp3'
+    CONNECTION_DONE = 'resources/sound_effects/connection_done.wav'
+    CONNECTION_WRONG = 'resources/sound_effects/connection_wrong.wav'
+    LEVEL_COMPLETE = 'resources/sound_effects/level_complete.wav'
+    BRICK_HIT = 'resources/sound_effects/brick_hit.wav'
 
 
 class STATES:
