@@ -8,6 +8,7 @@ class GAME_CONSTANTS:
     AUDIO_CHANNELS = 2  # The channels argument is used to specify whether to use mono or stereo.
     # 1 for mono and 2 for stereo
     AUDIO_BUFFER = 4096  # The buffer argument controls the number of internal samples used in the sound mixer
+    TIME = 300
 
 
 class CHIP_CONSTANTS:

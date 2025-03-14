@@ -1,11 +1,10 @@
-import sys
-
 import pygame
+from twisted.internet import reactor
 
 from constants import STATES
 from game_base import GameBase
-from scene_builders.menu_scene.menu_manager import MenuManager
 from scene_builders.mahjong_scene.mahjong_manager import MahjongManager
+from scene_builders.menu_scene.menu_manager import MenuManager
 from scene_builders.scene_director import SceneDirector
 
 
@@ -28,8 +27,7 @@ class Game(GameBase):
                 elif event.key == 'settings':
                     pass
             elif event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+                reactor.stop()
             elif event.type == pygame.KEYDOWN:
                 self.handle_alt_tab(event)
                 self.handle_key_down_event(event.key)

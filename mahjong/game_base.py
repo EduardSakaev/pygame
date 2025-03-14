@@ -1,4 +1,6 @@
 import pygame
+from twisted.internet import reactor
+from twisted.internet.task import LoopingCall
 
 
 class GameBase:
@@ -17,13 +19,15 @@ class GameBase:
     def handle_events(self):
         pass
 
+    def game_tick(self):
+        self._director.surface.fill((0, 0, 0))
+
+        self.handle_events()
+        self.update()
+        self.draw()
+        pygame.display.update()
+
     def run(self):
-        while self._is_game_running:
-            self._director.surface.fill((0, 0, 0))
-
-            self.handle_events()
-            self.update()
-            self.draw()
-
-            pygame.display.update()
-            self._clock.tick(self._frame_rate)
+        tick = LoopingCall(self.game_tick)
+        tick.start(1.0 / self._frame_rate)
+        reactor.run()

@@ -10,8 +10,6 @@ class Chip(ImageObjectBase):
         self._row = row
         self._column = column
         self._state = STATES.NORMAL
-        self._remove_chip_action = False
-        self._is_object_removed = False
 
     def draw(self, surface):
         surface.blit(self.image_obj, self._bounds)
@@ -21,11 +19,14 @@ class Chip(ImageObjectBase):
 
     def handle_mouse_move(self, pos):
         if self._bounds.collidepoint(pos):
-            if self._state != STATES.PRESSED and not self._remove_chip_action:
+            if self._state != STATES.PRESSED:
                 self._state = STATES.HOVER
         else:
             if not self._state == STATES.PRESSED:
                 self._state = STATES.NORMAL
+
+    def reset_state(self):
+        self._state = STATES.NORMAL
 
     def handle_mouse_up(self, pos):
         pass
@@ -56,27 +57,11 @@ class Chip(ImageObjectBase):
         self._column = value
 
     @property
-    def is_removed(self):
-        return self._is_object_removed
+    def image_max_width(self):
+        return self._image_max_width
 
     def __repr__(self):
         return '{}'.format(self.unique_id)
 
-    def remove_chip_from_board(self):
-        self._remove_chip_action = True
-        self._state = STATES.NORMAL
-
-    def remove_chip_action(self):
-        remove_scale_speed = 0.92
-        self.scale(self.width * remove_scale_speed, self.height * remove_scale_speed)
-        if self.width < 0.1 * self._image_max_width:
-            self._remove_chip_action = False
-            self._is_object_removed = True
-
-    @property
-    def scale_speed(self):
-        return
-
     def update(self):
-        if self._remove_chip_action:
-            self.remove_chip_action()
+        pass

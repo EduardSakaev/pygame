@@ -1,12 +1,13 @@
 import pygame
 
-from constants import COLORS
+from constants import COLORS, FONTS
 from sounds import Sounds
 from constants import TEXTURES
 from game_elements.brick import Brick
 from game_elements.chip import Chip
 from game_elements.cursor import Cursor
 from game_elements.image_object_base import ImageObjectBase
+from game_elements.text_object import TextObject
 
 
 class MahjongBuilder:
@@ -18,10 +19,16 @@ class MahjongBuilder:
         self._chip_background_objects = list()
         self._cursor = None
         self._sound_effects = Sounds()
+        self._text_timer = None
 
     def create_cursor(self):
         self._cursor = Cursor(TEXTURES.CURSOR, 100)
         self._scene_objects.append(self._cursor)
+
+    def create_timer(self, x_pos, y_pos, game_time):
+        self._text_timer = TextObject(x_pos, y_pos - 40, 'Time: {}'.format(game_time),
+                                      COLORS.ANTIQUEWHITE, FONTS.LUCIDAFAXREGULAR, 40, 5)
+        self._scene_objects.append(self._text_timer)
 
     def create_background(self):
         display_info = pygame.display.Info()
@@ -74,6 +81,10 @@ class MahjongBuilder:
     @property
     def cursor(self):
         return self._cursor
+
+    @property
+    def timer(self):
+        return self._text_timer
 
     @property
     def background(self):

@@ -22,7 +22,7 @@ class TextObject:
         text_surface = self._font.render(text, False, self._color)
         return text_surface, text_surface.get_rect()
 
-    def update(self, dw, dh):
+    def update(self):
         pass
 
     @property
@@ -32,3 +32,11 @@ class TextObject:
     @depth.setter
     def depth(self, value):
         self._depth = value
+
+    @property
+    def text(self):
+        return self._text
+
+    @text.setter
+    def text(self, value):
+        self._text = value
